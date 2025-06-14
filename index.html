@@ -333,6 +333,44 @@
 		else window.addEventListener("load", onLoad);
 	})();
 </script>
+<div id="deepseek-bot" style="position: fixed; bottom: 20px; left: 20px; background: #f2f2f2; padding: 10px; border-radius: 10px; width: 250px; font-family: Arial, sans-serif;">
+    <h4 style="margin: 0 0 10px;">DeepSeek Bot</h4>
+    <div id="chat-output" style="height: 150px; overflow-y: auto; font-size: 14px; background: white; padding: 5px; border: 1px solid #ccc; border-radius: 5px; margin-bottom: 10px;"></div>
+    <form id="chat-form">
+      <input type="text" id="user-input" placeholder="Type your message..." required style="width: 100%; padding: 5px;" />
+      <button type="submit" style="width: 100%; margin-top: 5px;">Send</button>
+    </form>
+  </div>
 
+  <script>
+    const form = document.getElementById('chat-form');
+    const input = document.getElementById('user-input');
+    const output = document.getElementById('chat-output');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const userMessage = input.value.trim();
+      if (!userMessage) return;
+
+      output.innerHTML += `<div><strong>You:</strong> ${userMessage}</div>`;
+      input.value = '';
+
+      try {
+        const res = await fetch('https://bb4e-43-246-224-225.ngrok-free.app/webhook/chatbot', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: userMessage })
+        });
+
+        const data = await res.json();
+        output.innerHTML += `<div><strong>Bot:</strong> ${data.reply || JSON.stringify(data)}</div>`;
+        output.scrollTop = output.scrollHeight;
+      } catch (err) {
+        output.innerHTML += `<div><strong>Error:</strong> ${err.message}</div>`;
+      }
+    });
+  </script>
+  
 	</body>
 </html>
