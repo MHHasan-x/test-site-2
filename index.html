@@ -333,14 +333,113 @@
 		else window.addEventListener("load", onLoad);
 	})();
 </script>
-<div id="deepseek-bot" style="position: fixed; bottom: 20px; left: 20px; background: #f2f2f2; padding: 10px; border-radius: 10px; width: 250px; font-family: Arial, sans-serif;">
-    <h4 style="margin: 0 0 10px;">DeepSeek Bot</h4>
-    <div id="chat-output" style="height: 150px; overflow-y: auto; font-size: 14px; background: white; padding: 5px; border: 1px solid #ccc; border-radius: 5px; margin-bottom: 10px;"></div>
-    <form id="chat-form">
-      <input type="text" id="user-input" placeholder="Type your message..." required style="width: 100%; padding: 5px;" />
-      <button type="submit" style="width: 100%; margin-top: 5px;">Send</button>
-    </form>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>DeepSeek Chatbot</title>
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background-color: #f4f4f4;
+      padding: 40px;
+    }
+    #chat {
+      width: 100%;
+      max-width: 500px;
+      background: #fff;
+      border-radius: 10px;
+      padding: 20px;
+      height: 500px;
+      overflow-y: auto;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .msg {
+      margin-bottom: 10px;
+      line-height: 1.5;
+    }
+    .user {
+      text-align: right;
+      font-weight: bold;
+    }
+    .bot {
+      text-align: left;
+      color: #333;
+    }
+    #inputArea {
+      margin-top: 20px;
+      width: 100%;
+      max-width: 500px;
+      display: flex;
+    }
+    input {
+      flex: 1;
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 8px 0 0 8px;
+    }
+    button {
+      padding: 10px 16px;
+      font-size: 16px;
+      border: none;
+      background-color: #2b8af7;
+      color: white;
+      border-radius: 0 8px 8px 0;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h2>DeepSeek Bot</h2>
+  <div id="chat"></div>
+  <div id="inputArea">
+    <input type="text" id="userInput" placeholder="Ask me something..." />
+    <button onclick="sendMessage()">Send</button>
   </div>
+
+  <script>
+    const webhookUrl = "https://your-n8n-url.com/webhook/deepseek"; // replace with actual
+
+    function addMessage(role, text) {
+      const chat = document.getElementById("chat");
+      const div = document.createElement("div");
+      div.classList.add("msg", role);
+      div.textContent = (role === "user" ? "You: " : "Bot: ") + text;
+      chat.appendChild(div);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    async function sendMessage() {
+      const input = document.getElementById("userInput");
+      const message = input.value.trim();
+      if (!message) return;
+
+      addMessage("user", message);
+      input.value = "";
+
+      try {
+        const response = await fetch(webhookUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message })
+        });
+        const data = await response.json();
+
+        // ✅ Extract proper reply (adjust path based on n8n’s return)
+        const botReply = data.choices?.[0]?.message?.content || "No response.";
+        addMessage("bot", botReply);
+      } catch (err) {
+        console.error(err);
+        addMessage("bot", "Something went wrong. Try again.");
+      }
+    }
+  </script>
+</body>
+</html>
 
   <script>
     const form = document.getElementById('chat-form');
@@ -371,6 +470,5 @@
       }
     });
   </script>
-  
 	</body>
 </html>
